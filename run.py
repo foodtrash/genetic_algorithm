@@ -2,14 +2,16 @@ import random
 
 
 class Algorithm(object):
-	def __init__(self, a, b, c, d):
+	def __init__(self, a, b, c, d, number_of_chromosomes, mutation):
 		self.a = a
 		self.b = b 
 		self.c = c
 		self.d = d
 		self.f_min_classic = 0
 		self.f_max_classic = 0
-	
+		self.number_of_chromosomes = number_of_chromosomes
+		self.mutation = mutation
+
 	
 	def algorithm_classic(self):
 		f_min = 0
@@ -44,8 +46,9 @@ class Algorithm(object):
 		while(True):
 			decode = self.decode_decimal(chromosome)
 			f_min, f_max = self.func(decode, f_min, f_max)
-			before_mutation = self.select_couples(chromosome)
-			chromosome = self.mutation(before_mutation)
+			couples = self.select_couples(chromosome)
+			couples = self.unpack_pairs(couples)
+			chromosome = self.mutation_func(couples)
 			if f_min == self.f_min_classic and f_min_flag != 1:
 				f_min_iter, f_min_flag = self.sumbit_max_or_min(f_min, f_min_iter, iteration)
 			if f_max == self.f_max_classic and f_max_flag != 1:
@@ -66,69 +69,69 @@ class Algorithm(object):
 			return current_iteration, flag
 
 
-	def mutation(self, before_mutation):
-		random_choice = random.choice(before_mutation)
-		before_mutation.remove(random_choice)
-		number = (random.randint(0, 5))
-		these_number = random_choice[number]
-		new_value = '0' if these_number == '1' else '1'
-		new_number = random_choice[:number]
-		new_number += new_value
-		new_number += random_choice[number+1:]
-		before_mutation.append(new_number)
-		return before_mutation
+	def mutation_func(self, array_of_chromosomes):
+		mutation_list=list()
+		while self.mutation:
+			random_choice = random.choice(array_of_chromosomes)
+			array_of_chromosomes.remove(random_choice)
+			number = (random.randint(0, 5))
+			these_number = random_choice[number]
+			new_value = '0' if these_number == '1' else '1'
+			new_chromosome = random_choice[:number]
+			new_chromosome += new_value
+			new_chromosome += random_choice[number+1:]
+			mutation_list.append(new_chromosome)
+			self.mutation -=1
+		all_list_of_chromosomes = self.add_non_mutable_chromosomes(array_of_chromosomes,mutation_list)
+		return array_of_chromosomes
 
+
+	def add_non_mutable_chromosomes(self,non_mutable,mutable):
+		for i in non_mutable:
+			mutable.append(i)
+		return mutable
+
+
+	def unpack_pairs(self,pairs):
+		new_array=list()
+		for couples in pairs:
+			for single in couples:
+				new_array.append(single)
+		return new_array
 
 	def select_couples(self, chromosome):
-		pair_1_1 = random.choice(chromosome)
-		chromosome.remove(pair_1_1)
-		pair_1_2 = random.choice(chromosome)
-		chromosome.remove(pair_1_2)
-		pair_2_1 = random.choice(chromosome)
-		chromosome.remove(pair_2_1)
-		pair_2_2 = random.choice(chromosome)
-		chromosome.remove(pair_2_2)
-		return self.crossing(pair_1_1,pair_1_2,pair_2_1,pair_2_2)
+		new_chromosome = list()
+		generate_slice = self.generate_slice()
+		while True:
+			if not generate_slice:
+					generate_slice = self.generate_slice()
+			first_gene = random.choice(chromosome)
+			chromosome.remove(first_gene)
+			second_gene = random.choice(chromosome)
+			chromosome.remove(second_gene)
+			number = random.choice(generate_slice)
+			generate_slice.remove(number)
+			new_genes = self.crossing(first_gene, second_gene, number)
+			new_chromosome.append(new_genes)
+			if not chromosome:
+				return new_chromosome
 
 
-	def crossing(self, pair_1_1, pair_1_2, pair_2_1, pair_2_2):
-		random_choice = [1, 2]
-		random_pair = [1, 2]
-		new_person = list()
-		for i in range (2):
-			choice = random.choice(random_choice)
-			pair = random.choice(random_pair)
-			if pair == 1:
-				if(choice==1):
-					buff1_1 = pair_1_1[0:2]
-					buff1_1 += pair_1_2[2:]
-					buff1_2 = pair_1_2[0:2]
-					buff1_2 += pair_1_1[2:]
-				if(choice==2):
-					buff1_1 = pair_1_1[0:4]
-					buff1_1 += pair_1_2[4:]
-					buff1_2 = pair_1_2[0:4]
-					buff1_2 += pair_1_1[4:]
-			if pair == 2:
-				if(choice == 1):
-					buff2_1 = pair_2_1[0:2]
-					buff2_1 += pair_2_2[2:]
-					buff2_2 = pair_2_2[0:2]
-					buff2_2 += pair_2_1[2:]
-				if(choice == 2):
-					buff2_1 = pair_2_1[0:4]
-					buff2_1 += pair_2_2[4:]
-					buff2_2 = pair_2_2[0:4]
-					buff2_2 += pair_2_1[4:]
-			random_choice.remove(choice)
-			random_pair.remove(pair)
-		new_person.append(buff1_1)
-		new_person.append(buff1_2)
-		new_person.append(buff2_1)
-		new_person.append(buff2_2)
-		return(new_person)
+
+	def generate_slice(self):
+		return [x for x in range (1,6)]
 
 
+	def crossing(self, chromosome_1,chromosome_2,randomnumber):
+		buf1=chromosome_1
+		chromosome_1 = chromosome_1[:randomnumber]
+		chromosome_1 += chromosome_2[randomnumber:]
+		chromosome_2 = chromosome_2[:randomnumber]
+		chromosome_2 += buf1[randomnumber:]
+		return [chromosome_1, chromosome_2]
+
+
+		
 	def func(self, array, f_min, f_max):
 		for x in array:
 			#f(x) = a + bx + cx 2  + dx 3
@@ -149,7 +152,7 @@ class Algorithm(object):
 
 	def make_chromosomes(self):
 		array_of_chromosomes=list()
-		for i in range (4):
+		for i in range (self.number_of_chromosomes):
 			new_chromosome = ""
 			for z in range(6):
 				new_chromosome += str(random.randint(0, 1))
@@ -157,9 +160,9 @@ class Algorithm(object):
 		return array_of_chromosomes
 
 
-	
+
 if __name__ == "__main__":
-	a=Algorithm(2,-5,47,-3)
+	a=Algorithm(2,-5,47,-3,40,4)
 	print("			classic alghoritm\n")
 	a.algorithm_classic()
 	print("\n")
