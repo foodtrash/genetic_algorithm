@@ -2,7 +2,7 @@ import random
 
 
 class Algorithm(object):
-	def __init__(self, a, b, c, d, number_of_chromosomes, mutation):
+	def __init__(self, a, b, c, d, number_of_chromosomes, mutation = 0):
 		self.a = a
 		self.b = b 
 		self.c = c
@@ -10,7 +10,7 @@ class Algorithm(object):
 		self.f_min_classic = 0
 		self.f_max_classic = 0
 		self.number_of_chromosomes = number_of_chromosomes
-		self.mutation = mutation
+		self.mutation = mutation if mutation else number_of_chromosomes // 4
 
 	
 	def algorithm_classic(self):
@@ -43,7 +43,7 @@ class Algorithm(object):
 		f_min_flag = 0
 		f_max_flag = 0
 		iteration = 1
-		while(True):
+		while True :
 			decode = self.decode_decimal(chromosome)
 			f_min, f_max = self.func(decode, f_min, f_max)
 			couples = self.select_couples(chromosome)
@@ -53,15 +53,15 @@ class Algorithm(object):
 				f_min_iter, f_min_flag = self.sumbit_max_or_min(f_min, f_min_iter, iteration)
 			if f_max == self.f_max_classic and f_max_flag != 1:
 				f_max_iter, f_max_flag = self.sumbit_max_or_min(f_max, f_max_iter, iteration)
-			if (f_max == self.f_max_classic and f_min == self.f_min_classic):
-				break
 			iteration += 1
+			if f_max == self.f_max_classic and f_min == self.f_min_classic:
+				break
 		print("max: ", f_max, "  bin: ", bin(f_max), "  iteration:  ", f_max_iter)
 		print("min: ", f_min, "  bin: ", bin(f_min), "  iteration:  ", f_min_iter)
 
 
 	def sumbit_max_or_min(self, value, current_iteration, iteration):
-		if (value == self.f_min_classic or value == self.f_max_classic ):
+		if (value == self.f_min_classic or value == self.f_max_classic):
 			flag = 1
 			return iteration, flag
 		else:
@@ -70,8 +70,9 @@ class Algorithm(object):
 
 
 	def mutation_func(self, array_of_chromosomes):
-		mutation_list=list()
-		while self.mutation:
+		mutation_list = list()
+		mutation = self.mutation
+		while mutation:
 			random_choice = random.choice(array_of_chromosomes)
 			array_of_chromosomes.remove(random_choice)
 			number = (random.randint(0, 5))
@@ -79,21 +80,21 @@ class Algorithm(object):
 			new_value = '0' if these_number == '1' else '1'
 			new_chromosome = random_choice[:number]
 			new_chromosome += new_value
-			new_chromosome += random_choice[number+1:]
+			new_chromosome += random_choice[number + 1:]
 			mutation_list.append(new_chromosome)
-			self.mutation -=1
-		all_list_of_chromosomes = self.add_non_mutable_chromosomes(array_of_chromosomes,mutation_list)
-		return array_of_chromosomes
+			mutation -= 1
+		all_list_of_chromosomes = self.add_non_mutable_chromosomes(array_of_chromosomes, mutation_list)
+		return all_list_of_chromosomes
 
 
-	def add_non_mutable_chromosomes(self,non_mutable,mutable):
+	def add_non_mutable_chromosomes(self, non_mutable, mutable):
 		for i in non_mutable:
 			mutable.append(i)
 		return mutable
 
 
-	def unpack_pairs(self,pairs):
-		new_array=list()
+	def unpack_pairs(self, pairs):
+		new_array = list()
 		for couples in pairs:
 			for single in couples:
 				new_array.append(single)
@@ -102,7 +103,7 @@ class Algorithm(object):
 	def select_couples(self, chromosome):
 		new_chromosome = list()
 		generate_slice = self.generate_slice()
-		while True:
+		while chromosome:
 			if not generate_slice:
 					generate_slice = self.generate_slice()
 			first_gene = random.choice(chromosome)
@@ -113,23 +114,20 @@ class Algorithm(object):
 			generate_slice.remove(number)
 			new_genes = self.crossing(first_gene, second_gene, number)
 			new_chromosome.append(new_genes)
-			if not chromosome:
-				return new_chromosome
-
+		return new_chromosome
 
 
 	def generate_slice(self):
 		return [x for x in range (1,6)]
 
 
-	def crossing(self, chromosome_1,chromosome_2,randomnumber):
-		buf1=chromosome_1
+	def crossing(self, chromosome_1, chromosome_2, randomnumber):
+		buf1 = chromosome_1
 		chromosome_1 = chromosome_1[:randomnumber]
 		chromosome_1 += chromosome_2[randomnumber:]
 		chromosome_2 = chromosome_2[:randomnumber]
 		chromosome_2 += buf1[randomnumber:]
 		return [chromosome_1, chromosome_2]
-
 
 		
 	def func(self, array, f_min, f_max):
@@ -162,7 +160,7 @@ class Algorithm(object):
 
 
 if __name__ == "__main__":
-	a=Algorithm(2,-5,47,-3,40,4)
+	a=Algorithm(2,-5,47,-3,8)
 	print("			classic alghoritm\n")
 	a.algorithm_classic()
 	print("\n")
