@@ -13,6 +13,9 @@ class Algorithm(object):
 		self.mutation = mutation if mutation else number_of_chromosomes // 4
 
 	
+	def run(self):
+		self.algorithm_classic()
+
 	def algorithm_classic(self):
 		f_min = 0
 		f_max = 0
@@ -56,20 +59,19 @@ class Algorithm(object):
 			couples = self.unpack_pairs(couples)
 			chromosome = self.mutation_func(couples)
 			if f_min_genetic == f_min_classic and f_min_flag != 1:
-				f_min_iter, f_min_flag = self.sumbit_max_or_min(f_min_genetic, f_min_iter, iteration)
+				f_min_iter, f_min_flag = self.sumbit_max_or_min(f_min_genetic, f_min_iter, iteration, f_min_classic)
 			if f_max_genetic == f_max_classic and f_max_flag != 1:
-				f_max_iter, f_max_flag = self.sumbit_max_or_min(f_max_genetic, f_max_iter, iteration)
-			iteration += 1
+				f_max_iter, f_max_flag = self.sumbit_max_or_min(f_max_genetic, f_max_iter, iteration, f_max_classic)
 			if f_max_genetic == f_max_classic and f_min_genetic == f_min_classic:
+				print("			genetic alghoritm\n")
+				self.print_result(f_max_genetic, f_max_iter, "max: bin: iter:")
+				self.print_result(f_min_genetic, f_min_iter, "min: bin: iter:")
 				break
-		print(f_max_iter)
-		print("			genetic alghoritm\n")
-		self.print_result(f_max_genetic, f_max_iter, "max: bin: iter:")
-		self.print_result(f_min_genetic, f_min_iter, "min: bin: iter:")
+			iteration += 1
 
 
-	def sumbit_max_or_min(self, value, current_iteration, iteration):
-		if (value == self.f_min_classic or value == self.f_max_classic):
+	def sumbit_max_or_min(self, value, current_iteration, iteration, comparison_number):
+		if (value == comparison_number):
 			flag = 1
 			return iteration, flag
 		else:
@@ -167,5 +169,5 @@ class Algorithm(object):
 
 
 if __name__ == "__main__":
-	a=Algorithm(2, -5, 47, -3, 10, 0)
-	a.algorithm_classic()
+	a=Algorithm(2, -5, 47, -3, 4, 0)
+	a.run()
