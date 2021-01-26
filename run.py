@@ -28,36 +28,44 @@ class Algorithm(object):
 				f_max = result
 				f_max_iter = iteration
 			iteration += 1
-		print("max: ", f_max, "  bin: ", bin(f_max), "iter:  ", f_max_iter)
-		print("min: ", f_min, "  bin: ", bin(f_min), "iter:  ", f_min_iter)
-		self.f_min_classic = f_min
-		self.f_max_classic = f_max
+		print("			classic alghoritm\n")
+		self.print_result(f_max, f_max_iter, "max: bin: iter:")
+		self.print_result(f_min, f_min_iter, "min: bin: iter:")
+		self.algorithm_genetic(f_max, f_min)
 
+	def print_result(self, number, iter, text):
+		array_of_string = self.split_text(text)
+		print(array_of_string[0], number, array_of_string[1], bin(number), array_of_string[2], iter)
 
-	def algorithm_genetic(self):
+	def split_text(self, text):
+		return text.split()
+
+	def algorithm_genetic(self, f_max_classic, f_min_classic):
 		chromosome = self.make_chromosomes()
-		f_min = 0
+		f_min_genetic = 0
 		f_min_iter = 0
-		f_max = 0
+		f_max_genetic = 0
 		f_max_iter = 0
 		f_min_flag = 0
 		f_max_flag = 0
 		iteration = 1
 		while True :
 			decode = self.decode_decimal(chromosome)
-			f_min, f_max = self.func(decode, f_min, f_max)
+			f_min_genetic, f_max_genetic = self.func(decode, f_min_genetic, f_max_genetic)
 			couples = self.select_couples(chromosome)
 			couples = self.unpack_pairs(couples)
 			chromosome = self.mutation_func(couples)
-			if f_min == self.f_min_classic and f_min_flag != 1:
-				f_min_iter, f_min_flag = self.sumbit_max_or_min(f_min, f_min_iter, iteration)
-			if f_max == self.f_max_classic and f_max_flag != 1:
-				f_max_iter, f_max_flag = self.sumbit_max_or_min(f_max, f_max_iter, iteration)
+			if f_min_genetic == f_min_classic and f_min_flag != 1:
+				f_min_iter, f_min_flag = self.sumbit_max_or_min(f_min_genetic, f_min_iter, iteration)
+			if f_max_genetic == f_max_classic and f_max_flag != 1:
+				f_max_iter, f_max_flag = self.sumbit_max_or_min(f_max_genetic, f_max_iter, iteration)
 			iteration += 1
-			if f_max == self.f_max_classic and f_min == self.f_min_classic:
+			if f_max_genetic == f_max_classic and f_min_genetic == f_min_classic:
 				break
-		print("max: ", f_max, "  bin: ", bin(f_max), "  iteration:  ", f_max_iter)
-		print("min: ", f_min, "  bin: ", bin(f_min), "  iteration:  ", f_min_iter)
+		print(f_max_iter)
+		print("			genetic alghoritm\n")
+		self.print_result(f_max_genetic, f_max_iter, "max: bin: iter:")
+		self.print_result(f_min_genetic, f_min_iter, "min: bin: iter:")
 
 
 	def sumbit_max_or_min(self, value, current_iteration, iteration):
@@ -158,11 +166,6 @@ class Algorithm(object):
 		return array_of_chromosomes
 
 
-
 if __name__ == "__main__":
-	a=Algorithm(2,-5,47,-3,8)
-	print("			classic alghoritm\n")
+	a=Algorithm(2, -5, 47, -3, 10, 0)
 	a.algorithm_classic()
-	print("\n")
-	print("			genetic alghoritm\n")
-	a.algorithm_genetic()
